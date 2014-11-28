@@ -68,6 +68,7 @@ class LogAggregator::SingleBenchmarkEventGroup
   end
 
   def keys_slice(kind, timestamp)
+    timestamp = timestamp.clone.utc
     day      = "#{timestamp.to_date.to_s}"
     k_day    = "#{day}/#{kind}"
     k_hour   = "#{day}/#{timestamp.hour}/#{kind}"
