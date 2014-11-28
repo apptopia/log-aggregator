@@ -1,8 +1,11 @@
+require 'set'
 require 'yaml'
 require 'redis'
+require 'time'
 
 module LogAggregator
   require_relative 'log_aggregator/query_map'
+  require_relative 'log_aggregator/single_benchmark_event_group'
 
   def self.root
     @root ||= Pathname.new(File.expand_path('../../', __FILE__))
