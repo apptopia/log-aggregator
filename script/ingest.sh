@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 rbenv_root="/usr/local/rbenv"
 export RBENV_ROOT="$rbenv_root"
