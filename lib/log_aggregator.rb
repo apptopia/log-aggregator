@@ -3,6 +3,7 @@ require 'json'
 require 'yaml'
 require 'redis'
 require 'time'
+require 'logger'
 
 module LogAggregator
   require_relative 'log_aggregator/query_map'
