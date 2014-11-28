@@ -1,8 +1,6 @@
 require 'spec_helper'
 
-# TODO fix: timestamps are TZ sensitive, pull ActiveSupport as another dep?
-
-describe LogAggregator::Ingestor do
+describe LogAggregator::Reporter do
   before(:each) {
     LogAggregator.redis.flushdb
   }
@@ -22,24 +20,37 @@ Nov 27 09:50:52 prod-boglach-worker12 app-boglach[8808]: 09:50:52.753 :69180140 
   }
 
   let(:ingestor) {LogAggregator::Ingestor.new}
+  let(:reporter) {LogAggregator::Reporter.new}
 
-  it "handles log lines" do
+  it "prints longest report without errors" do
     sample_lines.each_line {|l|
       ingestor.handle_logline('CQL', l)
     }
 
-    labels, counts, avgs, errors = ingestor.cql_benchmark.minute_series(
-      Time.parse('2014-11-27 16:50:00'),
-      Time.parse('2014-11-27 16:52:00'),
-    )
+    l = lambda {
+      reporter.print_longest(
+        Time.parse('2014-11-27 16:50:00'),
+        Time.parse('2014-11-27 16:52:00'),
+        10
+      )
+    }
 
-    expect(labels).to eq(["2014-11-27 16:50:00", "2014-11-27 16:51:00", "2014-11-27 16:52:00"])
+    expect(l).to_not raise_error
+  end
 
-    expect(counts).to eq({"xyz"=>[2, 0, 2], "abc"=>[2, 0, 1]})
+  it "prints hottest report without errors" do
+    sample_lines.each_line {|l|
+      ingestor.handle_logline('CQL', l)
+    }
 
-    a1, a2, a3 = avgs["abc"]
-    expect(a1).to be_within(0.0001).of(0.0119)
-    expect(a2).to be_within(0.0001).of(0.0)
-    expect(a3).to be_within(0.0001).of(0.0055)
+    l = lambda {
+      reporter.print_hottest(
+        Time.parse('2014-11-27 16:50:00'),
+        Time.parse('2014-11-27 16:52:00'),
+        10
+      )
+    }
+
+    expect(l).to_not raise_error
   end
 end

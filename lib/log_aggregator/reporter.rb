@@ -28,10 +28,10 @@ class LogAggregator::Reporter
 
       printf "Query: %s\n\n", query
 
-      printf "%s 10%s 10%s 10%s", 'Timestamp', 'Count', 'Average', 'Errors'
+      printf "%20s %10s %10s %10s\n", 'Timestamp', 'Count', 'Average', 'Errors'
 
       legend.each_with_index {|l, i|
-        puts "%s 10%d 10.3%f 10%d", l, c_series[i], a_series[i], e_series[i]
+        printf "%20s %10d %10.3f %10d\n", l, c_series[i] || 0, a_series[i] || 0.0, e_series[i] || 0
       }
     }
   end

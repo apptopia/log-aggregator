@@ -12,7 +12,7 @@ class LogAggregator::QueryMap
   end
 
   def get(key)
-    mget([key]).first
+    mget([key]).first.last
   end
 
   def mget(keys)
