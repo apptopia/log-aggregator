@@ -21,6 +21,18 @@ Nov 27 09:50:52 prod-boglach-worker12 app-boglach[8808]: 09:50:52.753 :69180140 
     TXT
   }
 
+  let(:cql_line) {
+    'Nov 27 09:50:52 prod-boglach-worker12 app-boglach[8808]: 09:50:52.753 :69180140 # #CQL :: {"type":"query","query":"xyz","ts":1417099952,"t":0.009008195}'
+  }
+
+  let(:worker_bm_line) {
+    'Nov 27 09:52:35 prod-boglach-worker21 app-boglach[9004]: 09:52:35.159 :92887440 # #WORKER-BM {"ts":1417099951,"worker":"Canonic::GooglePlay::AppBreakoutCalculationsWorker","queue":"google_play_app_breakout_calculations","total":3.3580825328826904,"other":1.4104158228826902,"cql":1.9476667100000002,"s3":0.0,"sql":0}'
+  }
+
+  let(:irrelevant_line) {
+    'Nov 27 09:52:35 prod-boglach-worker21 app-boglach[9004]: 09:52:35.159 :92887440 # #BOO {}'
+  }
+
   let(:ingestor) {LogAggregator::Ingestor.new}
 
   it "handles log lines" do
@@ -41,5 +53,20 @@ Nov 27 09:50:52 prod-boglach-worker12 app-boglach[8808]: 09:50:52.753 :69180140 
     expect(a1).to be_within(0.0001).of(0.0119)
     expect(a2).to be_within(0.0001).of(0.0)
     expect(a3).to be_within(0.0001).of(0.0055)
+  end
+
+  it "recognizes CQL tagged lines" do
+    expect(ingestor).to receive(:handle_logline).with('CQL', cql_line)
+    ingestor.handle_input_line(cql_line)
+  end
+
+  it "recognizes WORKER-BM tagged lines" do
+    expect(ingestor).to receive(:handle_logline).with('WORKER-BM', worker_bm_line)
+    ingestor.handle_input_line(worker_bm_line)
+  end
+
+  it "ignores irrelevant lines" do
+    expect(ingestor).not_to receive(:handle_logline)
+    ingestor.handle_input_line(irrelevant_line)
   end
 end

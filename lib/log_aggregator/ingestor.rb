@@ -7,6 +7,13 @@ class LogAggregator::Ingestor
     @cql_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('cql')
   end
 
+  TAGS_REGEX = /#(CQL|HTTP-BM|WORKER-BM)/
+
+  def handle_input_line(line)
+    m = TAGS_REGEX.match(line)
+    handle_logline(m[1], line) if m
+  end
+
   def handle_logline(tag, line)
     _, json_str = line.split(' :: ')
     json_str.chomp!
