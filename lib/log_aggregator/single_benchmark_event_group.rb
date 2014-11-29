@@ -27,6 +27,10 @@ class LogAggregator::SingleBenchmarkEventGroup
     avgs   = {}
     errors = {}
 
+    overall_counts = []
+    overall_avgs   = []
+    overall_errors = []
+
     t = time_from
     while t <= time_to
       label = t.strftime('%Y-%m-%d %H:%M:00')
@@ -51,13 +55,24 @@ class LogAggregator::SingleBenchmarkEventGroup
         (errors[k] ||= {})[label] = v.to_i
       }
 
+      overall_ok_count = get_overall_count(ok_key)
+      overall_bm = get_overall_becnhmark(ok_key)
+      overall_error_count = get_overall_count(error_key)
+
+      overall_counts << overall_ok_count.to_i
+      overall_avgs   << (overall_ok_count.to_i > 0 ? ((overall_bm || 0.0).to_f / overall_ok_count.to_i) : 0.0)
+      overall_errors << overall_error_count.to_i
+
       t += 60
     end
 
     return labels,
       extract_backfilled_series(labels, counts),
       extract_backfilled_series(labels, avgs),
-      extract_backfilled_series(labels, errors)
+      extract_backfilled_series(labels, errors),
+      overall_counts,
+      overall_avgs,
+      overall_errors
   end
 
   def extract_backfilled_series(labels, series_hash)
@@ -86,6 +101,14 @@ class LogAggregator::SingleBenchmarkEventGroup
 
   def get_benchmarks(collection)
     redis.hgetall("#{collection_name}/durations/#{collection}")
+  end
+
+  def get_overall_count(collection)
+    redis.get("#{collection_name}/overall_count/#{collection}")
+  end
+
+  def get_overall_becnhmark(collection)
+    redis.get("#{collection_name}/overall_duration/#{collection}")
   end
 
   def increment_overall_count(collection)
