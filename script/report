@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require_relative '../config/boot'
+require_relative '../lib/log_aggregator'
+require_relative '../lib/log_aggregator/report_cli'

@@ -33,6 +33,7 @@ class LogAggregator::Reporter
 
   def print_table(qs, legend, counts, avgs, errors)
     qs.each {|q|
+      printf "\n"
       query = self.cql_legend.get(q) || 'N/A'
       c_series = counts[q] || []
       a_series = avgs[q]   || []
