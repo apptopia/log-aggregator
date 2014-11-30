@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'json',            '~> 1.8.1'
+gem 'hiredis',         '~> 0.5.2'
 gem 'redis',           '~> 3.1.0'
 gem 'pry',             '~> 0.10.1'
 

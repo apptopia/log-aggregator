@@ -2,6 +2,7 @@ require 'set'
 require 'json'
 require 'yaml'
 require 'redis'
+require 'redis/connection/hiredis'
 require 'time'
 require 'logger'
 
