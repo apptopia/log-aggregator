@@ -20,7 +20,7 @@ def parse_time_settings(time_start, time_end, last_minutes)
     return t_time_start, t_time_end
   end
 
-  last_minutes ||= DEFAULT_INTERVAL * 60
+  last_minutes ||= DEFAULT_INTERVAL
   raise ConfigError, "--last-minutes should be > 0" unless last_minutes.to_i > 0
   t_time_end = Time.now
   t_time_start = t_time_end - last_minutes.to_i * 60
