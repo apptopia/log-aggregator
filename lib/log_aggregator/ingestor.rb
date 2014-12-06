@@ -1,10 +1,12 @@
 class LogAggregator::Ingestor
   attr_reader :cql_legend
   attr_reader :cql_benchmark
+  attr_reader :worker_benchmark
 
   def initialize
     @cql_legend = LogAggregator::QueryMap.new('cql_legend')
     @cql_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('cql')
+    @worker_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('worker')
   end
 
   TAGS_REGEX = /#(CQL|HTTP-BM|WORKER-BM)/
@@ -25,6 +27,8 @@ class LogAggregator::Ingestor
     case tag
     when 'CQL'
       handle_cql_event(event)
+    when 'WORKER-BM'
+      handle_worker_event(event)
     else
       # ignore
     end
@@ -61,6 +65,12 @@ class LogAggregator::Ingestor
       # Ignore the rest
       nil
     end
+  end
+
+  def handle_worker_event(event)
+    ts = Time.at(event['ts'])
+    bm = event['t']
+    self.worker_benchmark.register_event(event['worker'], ts, bm)
   end
 
 end
