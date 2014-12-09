@@ -4,6 +4,7 @@ class ConfigError < RuntimeError; end
 
 DEFAULT_INTERVAL = 10
 DEFAULT_LIMIT = 20
+BENCHMARKS = ['CQL', 'WORKER', 'HTTP']
 
 def parse_time_settings(time_start, time_end, last_minutes)
   raise ConfigError, "Can't use --last-minutes option with any of --time-start, --time-end" if (time_start || time_end) && last_minutes
@@ -32,18 +33,19 @@ def format_time(t)
   t.strftime('%Y-%m-%d %H:%M')
 end
 
-def report_hottest(t0, t1, limit)
+def report_hottest(benchmark, t0, t1, limit)
   puts "Running report for HOTTEST queries within #{format_time t0} .. #{format_time t1}"
   puts
-  LogAggregator::Reporter.new.cql_print_hottest(t0, t1, limit)
+  LogAggregator::Reporter.new.send("#{benchmark.downcase}_print_hottest", t0, t1, limit)
 end
 
-def report_longest(t0, t1, limit)
+def report_longest(benchmark, t0, t1, limit)
   puts "Running report for LONGEST queries within #{format_time t0} .. #{format_time t1}"
   puts
-  LogAggregator::Reporter.new.cql_print_longest(t0, t1, limit)
+  LogAggregator::Reporter.new.send("#{benchmark.downcase}_print_longest", t0, t1, limit)
 end
 
+benchmark = BENCHMARKS.first
 time_start = nil
 time_end = nil
 last_minutes = nil
@@ -61,6 +63,7 @@ opt_parser = OptionParser.new do |opts|
   opts.separator "Options:"
 
   opts.on("-h", "--help", "This help screen") {puts opts; exit(0)}
+  opts.on("-b", "--benchmark B", "Selects benchmark: CQL (default), WORKER, HTTP") {|b| benchmark = b.upcase}
   opts.on("--time-start TIME", "Start time for report") {|t| time_start = t}
   opts.on("--time-end TIME", "End time for report") {|t| time_end = t}
   opts.on("--last X", "Run report for time interval of last X minutes") {|t| last_minutes = t}
@@ -82,6 +85,8 @@ begin
     exit(-1)
   end
 
+  raise ConfigError, "benchmark should be any of #{BENCHMARKS.join ', '}, got #{benchmark}" unless BENCHMARKS.include?(benchmark)
+
   t0, t1 = parse_time_settings(time_start, time_end, last_minutes)
 
   limit ||= DEFAULT_LIMIT
@@ -89,9 +94,9 @@ begin
 
   case ARGV.first
   when 'hottest'
-    report_hottest(t0, t1, limit)
+    report_hottest(benchmark, t0, t1, limit)
   when 'longest'
-    report_longest(t0, t1, limit)
+    report_longest(benchmark, t0, t1, limit)
   else
     puts opt_parser
     exit(-1)
