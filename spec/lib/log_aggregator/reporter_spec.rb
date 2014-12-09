@@ -28,7 +28,7 @@ Nov 27 09:50:52 prod-boglach-worker12 app-boglach[8808]: 09:50:52.753 :69180140 
     }
 
     l = lambda {
-      reporter.print_longest(
+      reporter.cql_print_longest(
         Time.parse('2014-11-27 16:50:00'),
         Time.parse('2014-11-27 16:52:00'),
         10
@@ -44,7 +44,7 @@ Nov 27 09:50:52 prod-boglach-worker12 app-boglach[8808]: 09:50:52.753 :69180140 
     }
 
     l = lambda {
-      reporter.print_hottest(
+      reporter.cql_print_hottest(
         Time.parse('2014-11-27 16:50:00'),
         Time.parse('2014-11-27 16:52:00'),
         10

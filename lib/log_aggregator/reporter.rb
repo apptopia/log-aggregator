@@ -9,18 +9,26 @@ class LogAggregator::Reporter
     @worker_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('worker')
   end
 
-  def print_longest(time_from, time_to, limit)
-    legend, counts, avgs, errors, overall_counts, overall_avgs, overall_errors = self.cql_benchmark.minute_series(time_from, time_to)
-    sorted = avgs.sort_by {|q, series| -series.max}.take(limit).map(&:first)
-    print_overall(legend, overall_counts, overall_avgs, overall_errors)
-    print_table(sorted, legend, counts, avgs, errors, 'Query', method(:translate_cql_key))
+  def cql_print_longest(time_from, time_to, limit)
+    print_longest(self.cql_benchmark, time_from, time_to, limit, 'Query', method(:translate_cql_key))
   end
 
-  def print_hottest(time_from, time_to, limit)
-    legend, counts, avgs, errors, overall_counts, overall_avgs, overall_errors = self.cql_benchmark.minute_series(time_from, time_to)
+  def cql_print_hottest(time_from, time_to, limit)
+    print_hottest(self.cql_benchmark, time_from, time_to, limit, 'Query', method(:translate_cql_key))
+  end
+
+  def print_longest(benchmark, time_from, time_to, limit, title, translate_key_proc = nil)
+    legend, counts, avgs, errors, overall_counts, overall_avgs, overall_errors = benchmark.minute_series(time_from, time_to)
+    sorted = avgs.sort_by {|q, series| -series.max}.take(limit).map(&:first)
+    print_overall(legend, overall_counts, overall_avgs, overall_errors)
+    print_table(sorted, legend, counts, avgs, errors, title, translate_key_proc)
+  end
+
+  def print_hottest(benchmark, time_from, time_to, limit, title, translate_key_proc = nil)
+    legend, counts, avgs, errors, overall_counts, overall_avgs, overall_errors = benchmark.minute_series(time_from, time_to)
     sorted = counts.sort_by {|q, series| -series.inject(0) {|s, c| s + c}}.take(limit).map(&:first)
     print_overall(legend, overall_counts, overall_avgs, overall_errors)
-    print_table(sorted, legend, counts, avgs, errors, 'Query', method(:translate_cql_key))
+    print_table(sorted, legend, counts, avgs, errors, title, translate_key_proc)
   end
 
   def print_overall(legend, counts, avgs, errors)

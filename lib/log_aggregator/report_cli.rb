@@ -35,13 +35,13 @@ end
 def report_hottest(t0, t1, limit)
   puts "Running report for HOTTEST queries within #{format_time t0} .. #{format_time t1}"
   puts
-  LogAggregator::Reporter.new.print_hottest(t0, t1, limit)
+  LogAggregator::Reporter.new.cql_print_hottest(t0, t1, limit)
 end
 
 def report_longest(t0, t1, limit)
   puts "Running report for LONGEST queries within #{format_time t0} .. #{format_time t1}"
   puts
-  LogAggregator::Reporter.new.print_longest(t0, t1, limit)
+  LogAggregator::Reporter.new.cql_print_longest(t0, t1, limit)
 end
 
 time_start = nil
