@@ -69,7 +69,7 @@ class LogAggregator::Ingestor
 
   def handle_worker_event(event)
     ts = Time.at(event['ts'])
-    bm = event['t']
+    bm = event['total']
     self.worker_benchmark.register_event(event['worker'], ts, bm)
   end
 

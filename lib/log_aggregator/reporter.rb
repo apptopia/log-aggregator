@@ -9,6 +9,14 @@ class LogAggregator::Reporter
     @worker_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('worker')
   end
 
+  def worker_print_longest(time_from, time_to, limit)
+    print_longest(self.worker_benchmark, time_from, time_to, limit, 'Worker')
+  end
+
+  def worker_print_hottest(time_from, time_to, limit)
+    print_hottest(self.worker_benchmark, time_from, time_to, limit, 'Worker')
+  end
+
   def cql_print_longest(time_from, time_to, limit)
     print_longest(self.cql_benchmark, time_from, time_to, limit, 'Query', method(:translate_cql_key))
   end
