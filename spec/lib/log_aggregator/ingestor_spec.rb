@@ -64,6 +64,25 @@ Dec  9 13:29:35 prod-boglach-worker11 app-boglach[15752]: 13:29:35.333 :88201120
   end
 
   it "handles WORKER-BM log lines" do
+    influxdb = double('influxdb client')
+    allow(LogAggregator).to receive(:influxdb).and_return(influxdb)
+
+    expect(influxdb).to receive(:write_point).with(
+                            "workers",
+                            {:tags=>{"worker"=>"ItunesConnect::SyncAppsWorker", "queue"=>"itunes_connect"},
+                             :values=>{"total"=>79.59028840065002, "other"=>12.539522449650036, "cql"=>0.004121951, "s3"=>0.0, "sql"=>67.04664399999999},
+                             :timestamp=>1418149695}, "s")
+    expect(influxdb).to receive(:write_point).with(
+                            "workers",
+                            {:tags=>{"worker"=>"Etl::ItunesConnect::ApiScrapingWorker", "queue"=>"etl_itunes_connect"},
+                             :values=>{"total"=>0.039418935775756836, "other"=>0.007690426775756836, "cql"=>0.018954768, "s3"=>0.012773741, "sql"=>0},
+                             :timestamp=>1418149775}, "s")
+    expect(influxdb).to receive(:write_point).with(
+                            "workers",
+                            {:tags=>{"worker"=>"Etl::ItunesConnect::ApiScrapingWorker", "queue"=>"etl_itunes_connect"},
+                             :values=>{"total"=>0.20396065711975098, "other"=>0.11907253911975096, "cql"=>0.063488364, "s3"=>0.021399754, "sql"=>0},
+                             :timestamp=>1418149775}, "s")
+
     worker_bm_sample_lines.each_line {|l|
       ingestor.handle_logline('WORKER-BM', l)
     }
