@@ -76,7 +76,8 @@ class LogAggregator::Ingestor
 
     tags = event.slice('worker', 'queue')
     values = event.slice('total', 'other', 'cql', 's3', 'sql', 'r', 'error')
-    self.workers_series.register_event(tags, values)
+    timestamp = event['ts']
+    self.workers_series.register_event(tags, values, timestamp)
   end
 
 end
