@@ -14,11 +14,7 @@ class LogAggregator::MeasurementSeries
   def register_event(tags, values, timestamp)
     tags.merge!(uuid: SecureRandom.uuid)
     points << {series: series, tags: tags, values: values, timestamp: timestamp}
-    if points.size > 20
-      influxdb.write_points(points)
-      points.clear
-    end
-  end
 
-  def_delegator ::LogAggregator, :influxdb
+    # FIXME: write data somewhere
+  end
 end

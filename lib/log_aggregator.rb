@@ -3,7 +3,6 @@ require 'json'
 require 'yaml'
 require 'redis'
 require 'redis/connection/hiredis'
-require 'influxdb'
 require 'time'
 require 'logger'
 
@@ -24,18 +23,6 @@ module LogAggregator
       host = redis_config['host']
       port = redis_config['port']
       Redis.new(:host => host, :port => port)
-    end
-  end
-
-  def self.influxdb
-    @influxdb ||= begin
-      influxdb_config = YAML.load_file(root.join('config/influxdb.yml'))
-      host = influxdb_config['host']
-      port = influxdb_config['port']
-      database = influxdb_config['database']
-      username = influxdb_config['username']
-      password = influxdb_config['password']
-      InfluxDB::Client.new(database, host: host, port: port, username: username, password: password)
     end
   end
 end

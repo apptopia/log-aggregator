@@ -64,11 +64,6 @@ Dec  9 13:29:35 prod-boglach-worker11 app-boglach[15752]: 13:29:35.333 :88201120
   end
 
   it "handles WORKER-BM log lines" do
-    influxdb = double('influxdb client')
-    allow(LogAggregator).to receive(:influxdb).and_return(influxdb)
-
-    allow(influxdb).to receive(:write_points)
-
     worker_bm_sample_lines.each_line {|l|
       ingestor.handle_logline('WORKER-BM', l)
     }

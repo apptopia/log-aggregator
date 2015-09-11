@@ -3,7 +3,6 @@ source 'https://rubygems.org'
 gem 'json',            '~> 1.8.1'
 gem 'hiredis',         '~> 0.5.2'
 gem 'redis',           '~> 3.1.0'
-gem 'influxdb',        '~> 0.2.2'
 gem 'activesupport',   '~> 4.2.4'
 gem 'pry',             '~> 0.10.1'
 
