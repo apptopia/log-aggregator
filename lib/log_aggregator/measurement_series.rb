@@ -9,8 +9,8 @@ class LogAggregator::MeasurementSeries
     @series = series
   end
 
-  def register_event(tags, values, timestamp)
-    influxdb.write_point(series, {tags: tags, values: values, timestamp: timestamp}, 's')
+  def register_event(tags, values)
+    influxdb.write_point(series, {tags: tags, values: values})
   end
 
   def_delegator ::LogAggregator, :influxdb
