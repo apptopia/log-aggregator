@@ -1,12 +1,16 @@
 source 'https://rubygems.org'
 
-gem 'json',            '~> 1.8.3'
-gem 'hiredis',         '~> 0.6.0'
-gem 'redis',           '~> 3.2.1'
+gem 'json',            '~> 1.8.1'
+gem 'hiredis',         '~> 0.5.2'
+gem 'redis',           '~> 3.1.0'
 gem 'influxdb',        '~> 0.2.2'
 gem 'activesupport',   '~> 4.2.4'
 gem 'pry',             '~> 0.10.1'
 
-group :test do
-  gem 'rspec',         '~> 3.1.0', require: false
+group :deployment do
+  gem 'ruby-prof',          '~> 0.15.2',    require: false
+  gem 'rspec',              '~> 3.1.0',     require: false
+  gem 'capistrano',         '~> 2.15.5',    require: false
+  gem 'chef',               '~> 11.10.4',   require: false
+  gem 'capistrano-chef',    '~> 0.1.0',     require: false
 end
