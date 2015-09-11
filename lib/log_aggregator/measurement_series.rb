@@ -1,4 +1,5 @@
 require 'active_support/core_ext/hash/slice'
+require 'securerandom'
 
 class LogAggregator::MeasurementSeries
   extend Forwardable
@@ -10,6 +11,7 @@ class LogAggregator::MeasurementSeries
   end
 
   def register_event(tags, values, timestamp)
+    tags.merge!(uuid: SecureRandom.uuid)
     influxdb.write_point(series, {tags: tags, values: values, timestamp: timestamp}, 's')
   end
 
