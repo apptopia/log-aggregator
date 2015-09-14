@@ -9,16 +9,20 @@ class LogAggregator::SingleBenchmarkEventGroup
 
   def register_event(name, timestamp, bm)
     keys = keys_slice('ok', timestamp)
-    keys.each {|k| increment_count(name, k)}
-    keys.each {|k| increment_becnhmark(name, k, bm)}
-    keys.each {|k| increment_overall_count(k)}
-    keys.each {|k| increment_overall_becnhmark(k, bm)}
+    redis.pipelined do
+      keys.each {|k| increment_count(name, k)}
+      keys.each {|k| increment_benchmark(name, k, bm)}
+      keys.each {|k| increment_overall_count(k)}
+      keys.each {|k| increment_overall_becnhmark(k, bm)}
+    end
   end
 
   def register_error_event(name, timestamp)
     keys = keys_slice('error', timestamp)
-    keys.each {|k| increment_count(name, k)}
-    keys.each {|k| increment_overall_count(k)}
+    redis.pipelined do
+      keys.each {|k| increment_count(name, k)}
+      keys.each {|k| increment_overall_count(k)}
+    end
   end
 
   def minute_series(time_from, time_to)
@@ -123,7 +127,7 @@ class LogAggregator::SingleBenchmarkEventGroup
     redis.hincrby("#{collection_name}/counts/#{collection}", name, 1)
   end
 
-  def increment_becnhmark(name, collection, f)
+  def increment_benchmark(name, collection, f)
     redis.hincrbyfloat("#{collection_name}/durations/#{collection}", name, f)
   end
 
