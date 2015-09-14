@@ -57,9 +57,9 @@ class LogAggregator::Ingestor
       query_batch.each {|q, count|
         count.times {
           if !event['error']
-            self.cql_benchmark.register_event(query, ts, bm)
+            self.cql_benchmark.register_event(q, ts, bm)
           else
-            self.cql_benchmark.register_error_event(query, ts)
+            self.cql_benchmark.register_error_event(q, ts)
           end
         }
       }
