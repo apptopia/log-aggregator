@@ -13,8 +13,7 @@ class LogAggregator::MeasurementSeries
 
   def register_event(tags, values, timestamp)
     tags.merge!(uuid: SecureRandom.uuid)
-    points << {series: series, tags: tags, values: values, timestamp: timestamp}
-
     # FIXME: write data somewhere
+    # points << {series: series, tags: tags, values: values, timestamp: timestamp}
   end
 end
