@@ -76,7 +76,7 @@ class LogAggregator::FrequencyCounter
   end
 
   def previously_seen_filter(collection, timestamp, ttl)
-    # p = 0.0001       --- probability of getting false positive
+    # p = 0.0001       --- desired probability of getting false positive
     # n = 30_000_000   --- approx number of scrapings per day
     # m = (n * Math.log(p) / Math.log(1.0 / 2 ** Math.log(2))).ceil
     m = 575_103_503
