@@ -43,6 +43,10 @@ class LogAggregator::FrequencyCounter
     redis.get(previously_seen_count_key(collection)).to_i
   end
 
+  def set_previously_seen_count(collection, count)
+    redis.set(previously_seen_count_key(collection), count)
+  end
+
   def previously_seen_count_key(collection)
     "#{collection_name}/previously_seen_count/#{collection}"
   end
