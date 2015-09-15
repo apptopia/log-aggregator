@@ -80,7 +80,7 @@ class LogAggregator::Ingestor
     if !event['error']
       self.worker_benchmark.register_event(event['worker'], ts, bm)
     else
-      self.worker_benchmark.register_error_event(event['worker'], ts, bm)
+      self.worker_benchmark.register_error_event(event['worker'], ts)
     end
   end
 
