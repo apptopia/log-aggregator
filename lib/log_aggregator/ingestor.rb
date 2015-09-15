@@ -85,9 +85,8 @@ class LogAggregator::Ingestor
   end
 
   def handle_app_data_processing_event(event)
-    store = event['store']
-    processing_attrs = event.slice('app_id', 'country_iso', 'date')
+    processing_attrs = event.slice('app_id', 'country_iso', 'store')
     ts = Time.at(event['ts'] || Time.now.to_i)
-    app_processing_frequency.register_event(store, processing_attrs, ts)
+    app_processing_frequency.register_event(processing_attrs, ts)
   end
 end

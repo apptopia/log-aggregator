@@ -94,9 +94,9 @@ Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21543]: 06:59:25.936 :9739672
       ingestor.handle_logline('APP-DATA-PROCESSING', l)
     }
 
-    overall_count = ingestor.app_processing_frequency.get_overall_count('2015-09-15/itunes_connect')
-    previously_seen_count = ingestor.app_processing_frequency.get_previously_seen_count('2015-09-15/itunes_connect')
-    previously_seen_rate = ingestor.app_processing_frequency.get_previously_seen_rate('2015-09-15/itunes_connect')
+    overall_count = ingestor.app_processing_frequency.get_overall_count('2015-09-15')
+    previously_seen_count = ingestor.app_processing_frequency.get_previously_seen_count('2015-09-15')
+    previously_seen_rate = ingestor.app_processing_frequency.get_previously_seen_rate('2015-09-15')
 
     expect(overall_count).to eq(5)
     expect(previously_seen_count).to eq(1)
