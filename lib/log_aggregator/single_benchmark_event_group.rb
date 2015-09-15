@@ -13,7 +13,7 @@ class LogAggregator::SingleBenchmarkEventGroup
       keys.each {|k| increment_count(name, k)}
       keys.each {|k| increment_benchmark(name, k, bm)}
       keys.each {|k| increment_overall_count(k)}
-      keys.each {|k| increment_overall_becnhmark(k, bm)}
+      keys.each {|k| increment_overall_benchmark(k, bm)}
     end
   end
 
@@ -60,7 +60,7 @@ class LogAggregator::SingleBenchmarkEventGroup
       }
 
       overall_ok_count = get_overall_count(ok_key)
-      overall_bm = get_overall_becnhmark(ok_key)
+      overall_bm = get_overall_benchmark(ok_key)
       overall_error_count = get_overall_count(error_key)
 
       overall_counts << overall_ok_count.to_i
@@ -91,7 +91,7 @@ class LogAggregator::SingleBenchmarkEventGroup
 
   def keys_slice(kind, timestamp)
     timestamp = timestamp.clone.utc
-    day      = "#{timestamp.to_date.to_s}"
+    day      = timestamp.to_date.to_s
     k_day    = "#{day}/#{kind}"
     k_hour   = "#{day}/#{timestamp.hour}/#{kind}"
     k_minute = "#{day}/#{timestamp.hour}:#{timestamp.min}/#{kind}"
@@ -111,7 +111,7 @@ class LogAggregator::SingleBenchmarkEventGroup
     redis.get("#{collection_name}/overall_count/#{collection}")
   end
 
-  def get_overall_becnhmark(collection)
+  def get_overall_benchmark(collection)
     redis.get("#{collection_name}/overall_duration/#{collection}")
   end
 
@@ -119,7 +119,7 @@ class LogAggregator::SingleBenchmarkEventGroup
     redis.incr("#{collection_name}/overall_count/#{collection}")
   end
 
-  def increment_overall_becnhmark(collection, bm)
+  def increment_overall_benchmark(collection, bm)
     redis.incrbyfloat("#{collection_name}/overall_duration/#{collection}", bm)
   end
 

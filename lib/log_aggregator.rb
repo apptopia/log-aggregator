@@ -9,7 +9,7 @@ require 'logger'
 module LogAggregator
   require_relative 'log_aggregator/query_map'
   require_relative 'log_aggregator/single_benchmark_event_group'
-  require_relative 'log_aggregator/measurement_series'
+  require_relative 'log_aggregator/frequency_counter'
   require_relative 'log_aggregator/ingestor'
   require_relative 'log_aggregator/reporter'
 

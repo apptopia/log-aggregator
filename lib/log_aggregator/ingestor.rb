@@ -1,17 +1,19 @@
+require 'active_support/core_ext/hash/slice'
+
 class LogAggregator::Ingestor
   attr_reader :cql_legend
   attr_reader :cql_benchmark
   attr_reader :worker_benchmark
-  attr_reader :workers_series
+  attr_reader :app_processing_frequency
 
   def initialize
     @cql_legend = LogAggregator::QueryMap.new('cql_legend')
     @cql_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('cql')
     @worker_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('worker')
-    @workers_series = LogAggregator::MeasurementSeries.new('workers')
+    @app_processing_frequency = LogAggregator::FrequencyCounter.new('app_data_processing')
   end
 
-  TAGS_REGEX = /#(CQL|HTTP-BM|WORKER-BM)/
+  TAGS_REGEX = /#(CQL|HTTP-BM|WORKER-BM|APP-DATA-PROCESSING)/
 
   def handle_input_line(line)
     m = TAGS_REGEX.match(line)
@@ -31,6 +33,8 @@ class LogAggregator::Ingestor
       handle_cql_event(event)
     when 'WORKER-BM'
       handle_worker_event(event)
+    when 'APP-DATA-PROCESSING'
+      handle_app_data_processing_event(event)
     else
       # ignore
     end
@@ -72,12 +76,18 @@ class LogAggregator::Ingestor
   def handle_worker_event(event)
     ts = Time.at(event['ts'])
     bm = event['total']
-    self.worker_benchmark.register_event(event['worker'], ts, bm)
 
-    tags = event.slice('worker', 'queue')
-    values = event.slice('total', 'other', 'cql', 's3', 'sql', 'r', 'error')
-    timestamp = event['ts']
-    self.workers_series.register_event(tags, values, timestamp)
+    if !event['error']
+      self.worker_benchmark.register_event(event['worker'], ts, bm)
+    else
+      self.worker_benchmark.register_error_event(event['worker'], ts, bm)
+    end
   end
 
+  def handle_app_data_processing_event(event)
+    store = event['store']
+    processing_attrs = event.slice('app_id', 'country_iso', 'date')
+    ts = Time.at(event['ts'] || Time.now.to_i)
+    app_processing_frequency.register_event(store, processing_attrs, ts)
+  end
 end

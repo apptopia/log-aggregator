@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-# TODO fix: timestamps are TZ sensitive, pull ActiveSupport as another dep?
-
 describe LogAggregator::Ingestor do
   before(:each) {
     LogAggregator.redis.flushdb
@@ -29,12 +27,26 @@ Dec  9 13:29:35 prod-boglach-worker11 app-boglach[15752]: 13:29:35.333 :88201120
     TXT
   }
 
+  let(:app_data_processing_sample_lines) {
+    <<-TXT
+Sep 15 06:49:25 prod-boglach-worker11 app-boglach[1857]: 06:49:25.906 :87102960 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":547986727,"country_iso":"SG","date":"2015-09-15","data_processing_type":"incremental"}
+Sep 15 06:49:25 prod-boglach-worker11 app-boglach[1628]: 06:49:25.921 :88053820 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":546291130,"country_iso":"MY","date":"2015-09-15","data_processing_type":"incremental"}
+Sep 15 06:49:25 prod-boglach-worker306 app-boglach[9751]: 06:49:25.928 :87170080 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":877420555,"country_iso":"RU","date":"2015-09-15","data_processing_type":"full"}
+Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21544]: 06:49:25.936 :97396720 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":933521425,"country_iso":"TW","date":"2015-09-15","data_processing_type":"incremental"}
+Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21543]: 06:59:25.936 :97396720 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":933521425,"country_iso":"TW","date":"2015-09-15","data_processing_type":"incremental"}
+    TXT
+  }
+
   let(:cql_line) {
     'Nov 27 09:50:52 prod-boglach-worker12 app-boglach[8808]: 09:50:52.753 :69180140 # #CQL :: {"type":"query","query":"xyz","ts":1417099952,"t":0.009008195}'
   }
 
   let(:worker_bm_line) {
     'Nov 27 09:52:35 prod-boglach-worker21 app-boglach[9004]: 09:52:35.159 :92887440 # #WORKER-BM {"ts":1417099951,"worker":"Canonic::GooglePlay::AppBreakoutCalculationsWorker","queue":"google_play_app_breakout_calculations","total":3.3580825328826904,"other":1.4104158228826902,"cql":1.9476667100000002,"s3":0.0,"sql":0}'
+  }
+
+  let(:app_data_processing_line) {
+    'Sep 15 06:49:26 prod-boglach-worker13 app-boglach[19329]: 06:49:26.198 :86618660 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":427473420,"country_iso":"PH","date":"2015-09-15","data_processing_type":"incremental"}'
   }
 
   let(:irrelevant_line) {
@@ -49,8 +61,8 @@ Dec  9 13:29:35 prod-boglach-worker11 app-boglach[15752]: 13:29:35.333 :88201120
     }
 
     labels, counts, avgs, errors = ingestor.cql_benchmark.minute_series(
-      Time.parse('2014-11-27 16:50:00'),
-      Time.parse('2014-11-27 16:52:00'),
+      Time.parse('2014-11-27 16:50:00 +0200'),
+      Time.parse('2014-11-27 16:52:00 +0200'),
     )
 
     expect(labels).to eq(["2014-11-27 16:50:00", "2014-11-27 16:51:00", "2014-11-27 16:52:00"])
@@ -69,12 +81,26 @@ Dec  9 13:29:35 prod-boglach-worker11 app-boglach[15752]: 13:29:35.333 :88201120
     }
 
     labels, counts, avgs, errors = ingestor.worker_benchmark.minute_series(
-      Time.parse('2014-12-09 20:28:00'),
-      Time.parse('2014-12-09 20:29:00'),
+      Time.parse('2014-12-09 20:28:00 +0200'),
+      Time.parse('2014-12-09 20:29:00 +0200'),
     )
 
     expect(labels).to eq(["2014-12-09 20:28:00", "2014-12-09 20:29:00"])
     expect(counts).to eq({"Etl::ItunesConnect::ApiScrapingWorker"=>[0, 2], "ItunesConnect::SyncAppsWorker"=>[1, 0]})
+  end
+
+  it "handles APP-DATA-PROCESSING log lines" do
+    app_data_processing_sample_lines.each_line {|l|
+      ingestor.handle_logline('APP-DATA-PROCESSING', l)
+    }
+
+    overall_count = ingestor.app_processing_frequency.get_overall_count('2015-09-15/itunes_connect')
+    previously_seen_count = ingestor.app_processing_frequency.get_previously_seen_count('2015-09-15/itunes_connect')
+    previously_seen_rate = ingestor.app_processing_frequency.get_previously_seen_rate('2015-09-15/itunes_connect')
+
+    expect(overall_count).to eq(5)
+    expect(previously_seen_count).to eq(1)
+    expect(previously_seen_rate).to eq(0.2)
   end
 
   it "recognizes CQL tagged lines" do
@@ -85,6 +111,11 @@ Dec  9 13:29:35 prod-boglach-worker11 app-boglach[15752]: 13:29:35.333 :88201120
   it "recognizes WORKER-BM tagged lines" do
     expect(ingestor).to receive(:handle_logline).with('WORKER-BM', worker_bm_line)
     ingestor.handle_input_line(worker_bm_line)
+  end
+
+  it "recognizes APP-DATA-PROCESSING tagged lines" do
+    expect(ingestor).to receive(:handle_logline).with('APP-DATA-PROCESSING', app_data_processing_line)
+    ingestor.handle_input_line(app_data_processing_line)
   end
 
   it "ignores irrelevant lines" do

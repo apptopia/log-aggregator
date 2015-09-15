@@ -1,3 +1,10 @@
+GIT
+  remote: git://github.com/igrigorik/bloomfilter-rb.git
+  revision: 8c9da9516796f6653dd3905134e64c36016a6ea4
+  specs:
+    bloomfilter-rb (2.1.2)
+      redis
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -113,6 +120,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport (~> 4.2.4)
+  bloomfilter-rb (~> 2.1.2)!
   capistrano (~> 2.15.5)
   capistrano-chef (~> 0.1.0)
   chef (~> 11.10.4)

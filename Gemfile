@@ -5,6 +5,7 @@ gem 'hiredis',         '~> 0.5.2'
 gem 'redis',           '~> 3.1.0'
 gem 'activesupport',   '~> 4.2.4'
 gem 'pry',             '~> 0.10.1'
+gem 'bloomfilter-rb',  '~> 2.1.2', github: 'igrigorik/bloomfilter-rb'
 
 group :deployment do
   gem 'ruby-prof',          '~> 0.15.2',    require: false
