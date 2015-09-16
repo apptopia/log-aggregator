@@ -16,15 +16,17 @@ class LogAggregator::FrequencyCounter
     ts = timestamp.clone.utc
     collection = ts.to_date.to_s
 
-    filter_ttl = 1.day.from_now.utc.at_midnight.to_i - ts.to_i
-    filter = previously_seen_filter(collection, ts, filter_ttl)
+    filter = previously_seen_filter(collection, ts)
     event_key = event_attributes.sort.to_s
 
     previously_seen_count =
       if filter.include?(event_key)
         increment_previously_seen_count(collection)
       else
-        filter.insert(event_key)
+        redis.pipelined do
+          filter.insert(event_key)
+          redis.expireat(filter_key(collection), 1.day.from_now.to_i)
+        end
         get_previously_seen_count(collection)
       end
 
@@ -75,7 +77,7 @@ class LogAggregator::FrequencyCounter
     "#{collection_name}/previously_seen_rate/#{collection}"
   end
 
-  def previously_seen_filter(collection, timestamp, ttl)
+  def previously_seen_filter(collection, timestamp)
     # p = 0.0001       --- desired probability of getting false positive
     # n = 30_000_000   --- approx number of scrapings per day
     # m = (n * Math.log(p) / Math.log(1.0 / 2 ** Math.log(2))).ceil
@@ -83,9 +85,12 @@ class LogAggregator::FrequencyCounter
     # k = (Math.log(2) * m / n).round
     k = 13
 
-    BloomFilter::Redis.new(db: redis, namespace: "#{collection_name}/previously_seen/#{collection}",
-                           size: m, hashes: k,
-                           seed: timestamp.midnight.to_i, ttl: ttl)
+    BloomFilter::Redis.new(db: redis, namespace: filter_key(collection),
+                           size: m, hashes: k, seed: timestamp.at_midnight.to_i)
+  end
+
+  def filter_key(collection)
+    "#{collection_name}/previously_seen_filter/#{collection}"
   end
 
   def_delegator ::LogAggregator, :redis

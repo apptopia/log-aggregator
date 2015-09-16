@@ -29,11 +29,11 @@ Dec  9 13:29:35 prod-boglach-worker11 app-boglach[15752]: 13:29:35.333 :88201120
 
   let(:app_data_processing_sample_lines) {
     <<-TXT
-Sep 15 06:49:25 prod-boglach-worker11 app-boglach[1857]: 06:49:25.906 :87102960 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":547986727,"country_iso":"SG","date":"2015-09-15","data_processing_type":"incremental"}
-Sep 15 06:49:25 prod-boglach-worker11 app-boglach[1628]: 06:49:25.921 :88053820 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":546291130,"country_iso":"MY","date":"2015-09-15","data_processing_type":"incremental"}
-Sep 15 06:49:25 prod-boglach-worker306 app-boglach[9751]: 06:49:25.928 :87170080 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":877420555,"country_iso":"RU","date":"2015-09-15","data_processing_type":"full"}
-Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21544]: 06:49:25.936 :97396720 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":933521425,"country_iso":"TW","date":"2015-09-15","data_processing_type":"incremental"}
-Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21543]: 06:59:25.936 :97396720 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":933521425,"country_iso":"TW","date":"2015-09-15","data_processing_type":"incremental"}
+Sep 15 06:49:25 prod-boglach-worker11 app-boglach[1857]: 06:49:25.906 :87102960 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":547986727,"country_iso":"SG","date":"2015-09-15","data_processing_type":"incremental","ts":1442294521}
+Sep 15 06:49:25 prod-boglach-worker11 app-boglach[1628]: 06:49:25.921 :88053820 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":546291130,"country_iso":"MY","date":"2015-09-15","data_processing_type":"incremental","ts":1442294521}
+Sep 15 06:49:25 prod-boglach-worker306 app-boglach[9751]: 06:49:25.928 :87170080 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":877420555,"country_iso":"RU","date":"2015-09-15","data_processing_type":"full","ts":1442294522}
+Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21544]: 06:49:25.936 :97396720 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":933521425,"country_iso":"TW","date":"2015-09-15","data_processing_type":"incremental","ts":1442294522}
+Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21543]: 06:59:25.936 :97396720 # #APP-DATA-PROCESSING :: {"store":"itunes_connect","app_id":933521425,"country_iso":"TW","date":"2015-09-15","data_processing_type":"incremental","ts":1442296847}
     TXT
   }
 
