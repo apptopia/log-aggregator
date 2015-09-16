@@ -5,15 +5,17 @@ class LogAggregator::Ingestor
   attr_reader :cql_benchmark
   attr_reader :worker_benchmark
   attr_reader :app_processing_frequency
+  attr_reader :app_scheduling_frequency
 
   def initialize
     @cql_legend = LogAggregator::QueryMap.new('cql_legend')
     @cql_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('cql')
     @worker_benchmark = LogAggregator::SingleBenchmarkEventGroup.new('worker')
     @app_processing_frequency = LogAggregator::FrequencyCounter.new('app_data_processing')
+    @app_scheduling_frequency = LogAggregator::FrequencyCounter.new('app_data_scraping_scheduled')
   end
 
-  TAGS_REGEX = /#(CQL|HTTP-BM|WORKER-BM|APP-DATA-PROCESSING)/
+  TAGS_REGEX = /#(CQL|HTTP-BM|WORKER-BM|APP-DATA-PROCESSING|ED)/
 
   def handle_input_line(line)
     m = TAGS_REGEX.match(line)
@@ -35,6 +37,8 @@ class LogAggregator::Ingestor
       handle_worker_event(event)
     when 'APP-DATA-PROCESSING'
       handle_app_data_processing_event(event)
+    when 'ED'
+      handle_event_dispatch_event(event)
     else
       # ignore
     end
@@ -88,5 +92,38 @@ class LogAggregator::Ingestor
     processing_attrs = event.slice('app_id', 'country_iso', 'store')
     ts = Time.at(event['ts'] || Time.now.to_i)
     app_processing_frequency.register_event(processing_attrs, ts)
+  end
+
+  ITUNES_CONNECT_APP_SCRAPING_WORKER = 'Etl::ItunesConnect::ApiScrapingWorker'
+  GOOGLE_PLAY_APP_SCRAPING_WORKER = 'Etl::GooglePlay::AppScrappingWorker'
+
+  def handle_event_dispatch_event(event)
+    case event['run_once']
+      when /(#{ITUNES_CONNECT_APP_SCRAPING_WORKER}|#{GOOGLE_PLAY_APP_SCRAPING_WORKER})/
+        handle_app_data_scraping_event(event)
+      else
+        # Ignore the rest
+        nil
+    end
+  end
+
+  def handle_app_data_scraping_event(event)
+    run_once = event['run_once']
+    ts = Time.at(event['ts'])
+
+    _, worker, _, app_id, country_iso =  run_once.split('#')
+
+    store =
+      case worker
+        when ITUNES_CONNECT_APP_SCRAPING_WORKER
+          'itunes_connect'
+        when GOOGLE_PLAY_APP_SCRAPING_WORKER
+          'google_play'
+        else
+          return # ignore unknown worker
+      end
+
+    scheduling_attrs = {'app_id' => app_id, 'country_iso' => country_iso, 'store' => store}
+    app_scheduling_frequency.register_event(scheduling_attrs, ts)
   end
 end

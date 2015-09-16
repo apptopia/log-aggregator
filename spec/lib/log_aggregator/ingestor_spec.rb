@@ -37,6 +37,16 @@ Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21543]: 06:59:25.936 :9739672
     TXT
   }
 
+  let(:app_data_scraping_scheduled_lines) {
+    <<-TXT
+Sep 16 00:50:11 prod-boglach-worker11 app-boglach[16662]: 00:50:11.715 :88898180 # #ED :: {"run_once":"run_once#Etl::ItunesConnect::ApiScrapingWorker#schedule#659934173#US","ts":1442379011}
+Sep 16 00:50:11 prod-boglach-worker13 app-boglach[32380]: 00:50:11.733 :94987520 # #ED :: {"run_once":"run_once#Etl::ItunesConnect::ApiScrapingWorker#schedule#974670882#US","ts":1442379011}
+Sep 16 05:12:11 prod-boglach-worker6 app-boglach[18930]: 05:12:11.709 :81900460 # #ED :: {"run_once":"run_once#Etl::GooglePlay::AppScrappingWorker#schedule#com.cloudninedevelopmentllc.ErnieBelanger_164#US","ts":1442394731}
+Sep 16 05:12:11 prod-boglach-worker6 app-boglach[18930]: 05:12:11.709 :81900460 # #ED :: {"run_once":"run_once#Etl::GooglePlay::AppScrappingWorker#schedule#com.cloudninedevelopmentllc.ErnieBelanger_164#US","ts":1442394731}
+Sep 16 05:12:11 prod-boglach-worker6 app-boglach[18930]: 05:12:11.748 :81900460 # #ED :: {"run_once":"run_once#Etl::GooglePlay::AppScrappingWorker#schedule#com.cloudninedevelopmentllc.GeraldWalman_174#US","ts":1442394731}
+    TXT
+  }
+
   let(:cql_line) {
     'Nov 27 09:50:52 prod-boglach-worker12 app-boglach[8808]: 09:50:52.753 :69180140 # #CQL :: {"type":"query","query":"xyz","ts":1417099952,"t":0.009008195}'
   }
@@ -51,6 +61,10 @@ Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21543]: 06:59:25.936 :9739672
 
   let(:irrelevant_line) {
     'Nov 27 09:52:35 prod-boglach-worker21 app-boglach[9004]: 09:52:35.159 :92887440 # #BOO {}'
+  }
+
+  let(:event_dispatch_line) {
+    'Sep 16 00:50:11 prod-boglach-worker13 app-boglach[32380]: 00:50:11.872 :94987520 # #ED :: {"run_once":"run_once#Etl::ItunesConnect::ApiScrapingWorker#schedule#904495794#US","ts":1442379011}'
   }
 
   let(:ingestor) {LogAggregator::Ingestor.new}
@@ -103,6 +117,20 @@ Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21543]: 06:59:25.936 :9739672
     expect(previously_seen_rate).to eq(0.2)
   end
 
+  it "handles ED log lines with" do
+    app_data_scraping_scheduled_lines.each_line {|l|
+      ingestor.handle_logline('ED', l)
+    }
+
+    overall_count = ingestor.app_scheduling_frequency.get_overall_count('2015-09-16')
+    previously_seen_count = ingestor.app_scheduling_frequency.get_previously_seen_count('2015-09-16')
+    previously_seen_rate = ingestor.app_scheduling_frequency.get_previously_seen_rate('2015-09-16')
+
+    expect(overall_count).to eq(5)
+    expect(previously_seen_count).to eq(1)
+    expect(previously_seen_rate).to eq(0.2)
+  end
+
   it "recognizes CQL tagged lines" do
     expect(ingestor).to receive(:handle_logline).with('CQL', cql_line)
     ingestor.handle_input_line(cql_line)
@@ -116,6 +144,11 @@ Sep 15 06:49:25 prod-boglach-worker305 app-boglach[21543]: 06:59:25.936 :9739672
   it "recognizes APP-DATA-PROCESSING tagged lines" do
     expect(ingestor).to receive(:handle_logline).with('APP-DATA-PROCESSING', app_data_processing_line)
     ingestor.handle_input_line(app_data_processing_line)
+  end
+
+  it "recognizes ED tagged lines" do
+    expect(ingestor).to receive(:handle_logline).with('ED', event_dispatch_line)
+    ingestor.handle_input_line(event_dispatch_line)
   end
 
   it "ignores irrelevant lines" do

@@ -37,40 +37,40 @@ class LogAggregator::FrequencyCounter
     end
   end
 
-  def increment_previously_seen_count(collection)
-    redis.incr(previously_seen_count_key(collection))
+  def get_overall_count(collection)
+    redis.get(overall_count_key(collection)).to_i
   end
 
   def get_previously_seen_count(collection)
     redis.get(previously_seen_count_key(collection)).to_i
   end
 
-  def set_previously_seen_count(collection, count)
-    redis.set(previously_seen_count_key(collection), count)
-  end
-
-  def previously_seen_count_key(collection)
-    "#{collection_name}/previously_seen_count/#{collection}"
+  def get_previously_seen_rate(collection)
+    redis.get(previously_seen_rate_key(collection)).to_f
   end
 
   def increment_overall_count(collection)
     redis.incr(overall_count_key(collection))
   end
 
-  def get_overall_count(collection)
-    redis.get(overall_count_key(collection)).to_i
+  def increment_previously_seen_count(collection)
+    redis.incr(previously_seen_count_key(collection))
+  end
+
+  def set_previously_seen_count(collection, count)
+    redis.set(previously_seen_count_key(collection), count)
+  end
+
+  def set_previously_seen_rate(collection, rate)
+    redis.set(previously_seen_rate_key(collection), rate)
   end
 
   def overall_count_key(collection)
     "#{collection_name}/overall_count/#{collection}"
   end
 
-  def get_previously_seen_rate(collection)
-    redis.get(previously_seen_rate_key(collection)).to_f
-  end
-
-  def set_previously_seen_rate(collection, rate)
-    redis.set(previously_seen_rate_key(collection), rate)
+  def previously_seen_count_key(collection)
+    "#{collection_name}/previously_seen_count/#{collection}"
   end
 
   def previously_seen_rate_key(collection)
