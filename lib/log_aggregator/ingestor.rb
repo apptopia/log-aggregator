@@ -36,9 +36,9 @@ class LogAggregator::Ingestor
     when 'WORKER-BM'
       handle_worker_event(event)
     when 'APP-DATA-PROCESSING'
-      handle_app_data_processing_event(event)
+      # handle_app_data_processing_event(event)
     when 'ED'
-      handle_event_dispatch_event(event)
+      # handle_event_dispatch_event(event)
     else
       # ignore
     end
